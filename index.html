@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a237e">
+    <title>مدیریت مالی</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        :root {
+            --primary: #1a237e;
+            --primary-light: #534bae;
+            --accent: #ff6f00;
+            --success: #2e7d32;
+            --danger: #c62828;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #212121;
+            --text-secondary: #757575;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 20px;
+            padding-top: calc(20px + env(safe-area-inset-top));
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .balance-badge {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .tabs-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .tabs-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .tab-chip {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            transition: all 0.3s;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .tab-chip.active {
+            background: white;
+            color: var(--primary);
+            font-weight: bold;
+            border-color: white;
+            transform: scale(1.05);
+        }
+        
+        .main-content {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        
+        .card:active {
+            transform: scale(0.98);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        
+        .stat-item:active {
+            background: #f8f9fa;
+            transform: scale(0.95);
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-number {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--accent); }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: #fafafa;
+            transition: all 0.3s;
+            -webkit-appearance: none;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(26,35,126,0.1);
+        }
+        
+        select.form-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 10px center;
+            padding-left: 40px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(26,35,126,0.3);
+        }
+        
+        .btn-primary:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(26,35,126,0.2);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 15px rgba(198,40,40,0.3);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            border-radius: 15px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(26,35,126,0.1);
+        }
+        
+        .nav-item .nav-icon {
+            font-size: 1.5rem;
+        }
+        
+        .transaction-list {
+            list-style: none;
+        }
+        
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .transaction-item:active {
+            transform: scale(0.98);
+        }
+        
+        .transaction-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-left: 12px;
+            flex-shrink: 0;
+        }
+        
+        .transaction-info {
+            flex: 1;
+        }
+        
+        .transaction-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .transaction-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .transaction-amount {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            backdrop-filter: blur(5px);
+            align-items: flex-end;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 25px 25px 0 0;
+            padding: 20px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-close {
+            background: #f0f0f0;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .fab {
+            position: fixed;
+            bottom: 85px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-size: 2rem;
+            box-shadow: 0 6px 20px rgba(255,111,0,0.4);
+            cursor: pointer;
+            z-index: 90;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .fab:active {
+            transform: scale(0.9) rotate(90deg);
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success);
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            z-index: 300;
+            animation: fadeInOut 2s ease;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .priority-1 { background: #ffcdd2; color: #b71c1c; }
+        .priority-2 { background: #ffe0b2; color: #e65100; }
+        .priority-3 { background: #fff9c4; color: #f57f17; }
+        .priority-4 { background: #c8e6c9; color: #1b5e20; }
+        .priority-5 { background: #e1bee7; color: #4a148c; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-top">
+            <h1>💰 مدیریت مالی</h1>
+            <div class="balance-badge" id="quickBalance">۰ تومان</div>
+        </div>
+        
+        <div class="tabs-scroll" id="tabsContainer">
+            <div class="tab-chip active" data-tab="dashboard">📊 داشبورد</div>
+            <div class="tab-chip" data-tab="expenses">💸 هزینه‌ها</div>
+            <div class="tab-chip" data-tab="income">💵 درآمد</div>
+            <div class="tab-chip" data-tab="future">🔮 آینده</div>
+            <div class="tab-chip" data-tab="assets">🏠 دارایی</div>
+            <div class="tab-chip" data-tab="goals">🎯 اهداف</div>
+        </div>
+    </div>
+    
+    <div class="main-content" id="mainContent"></div>
+    
+    <button class="fab" id="fabButton">+</button>
+    
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+    
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="dashboard">
+            <span class="nav-icon">📊</span>
+            <span>داشبورد</span>
+        </button>
+        <button class="nav-item" data-tab="expenses">
+            <span class="nav-icon">💸</span>
+            <span>هزینه‌ها</span>
+        </button>
+        <button class="nav-item" data-tab="income">
+            <span class="nav-icon">💵</span>
+            <span>درآمد</span>
+        </button>
+        <button class="nav-item" data-tab="future">
+            <span class="nav-icon">🔮</span>
+            <span>آینده</span>
+        </button>
+        <button class="nav-item" data-tab="assets">
+            <span class="nav-icon">🏠</span>
+            <span>دارایی</span>
+        </button>
+        <button class="nav-item" data-tab="goals">
+            <span class="nav-icon">🎯</span>
+            <span>اهداف</span>
+        </button>
+    </nav>
+
+    <script>
+        // ============ دیتابیس محلی ============
+        const DB_KEY = 'financeAppData';
+        
+        let appData = {
+            expenses: [],
+            income: [],
+            futureExpenses: [],
+            assets: [],
+            goals: []
+        };
+        
+        function loadData() {
+            const saved = localStorage.getItem(DB_KEY);
+            if (saved) {
+                appData = JSON.parse(saved);
+            }
+        }
+        
+        function saveData() {
+            localStorage.setItem(DB_KEY, JSON.stringify(appData));
+            updateQuickBalance();
+        }
+        
+        function formatMoney(amount) {
+            const num = parseInt(amount) || 0;
+            return new Intl.NumberFormat('fa-IR').format(num) + ' تومان';
+        }
+        
+        function updateQuickBalance() {
+            const totalIncome = appData.income.reduce((sum, i) => sum + (parseInt(i.amount) || 0), 0);
+            const totalExpenses = appData.expenses.reduce((sum, e) => sum + (parseInt(e.amount) || 0), 0);
+            const balance = totalIncome - totalExpenses;
+            document.getElementById('quickBalance').textContent = formatMoney(balance);
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        }
+        
+        // ============ نویگیشن ============
+        let currentTab = 'dashboard';
+        
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            document.querySelectorAll('.tab-chip').forEach(t => t.classList.remove('active'));
+            const tabChip = document.querySelector(`.tab-chip[data-tab="${tabName}"]`);
+            if (tabChip) tabChip.classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const navItem = document.querySelector(`.nav-item[data-tab="${tabName}"]`);
+            if (navItem) navItem.classList.add('active');
+            
+            renderTabContent(tabName);
+            
+            const fab = document.getElementById('fabButton');
+            if (tabName === 'expenses' || tabName === 'income' || tabName === 'future' || tabName === 'assets' || tabName === 'goals') {
+                fab.style.display = 'flex';
+            } else {
+                fab.style.display = 'none';
+            }
+        }
+        
+        function renderTabContent(tab) {
+            const content = document.getElementById('mainContent');
+            
+            switch(tab) {
+                case 'dashboard':
+                    renderDashboard(content);
+                    break;
+                case 'expenses':
+                    renderExpensesList(content);
+                    break;
+                case 'income':
+                    renderIncomeList(content);
+                    break;
+                case 'future':
+                    renderFutureExpensesList(content);
+                    break;
+                case 'assets':
+                    renderAssetsList(content);
+                    break;
+                case 'goals':
+                    renderGoalsList(content);
+                    break;
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // ============ داشبورد ============
+        function renderDashboard(container) {
+            const totalIncome = appData.income.reduce((sum, i) => sum + (parseInt(i.amount) || 0), 0);
+            const totalExpenses = appData.expenses.reduce((sum, e) => sum + (parseInt(e.amount) || 0), 0);
+            const balance = totalIncome - totalExpenses;
+            const totalAssets = appData.assets.reduce((sum, a) => sum + (parseInt(a.value) || 0), 0);
+            
+            const now = new Date();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+            
+            const monthlyIncome = appData.income
+                .filter(i => new Date(i.date).getMonth() === thisMonth && new Date(i.date).getFullYear() === thisYear)
+                .reduce((sum, i) => sum + (parseInt(i.amount) || 0), 0);
+            
+            const monthlyExpenses = appData.expenses
+                .filter(e => new Date(e.date).getMonth() === thisMonth && new Date(e.date).getFullYear() === thisYear)
+                .reduce((sum, e) => sum + (parseInt(e.amount) || 0), 0);
+            
+            // هزینه‌های آینده برنامه‌ریزی نشده
+            const pendingFuture = appData.futureExpenses.filter(f => f.status === 'انجام نشده' || f.status === 'در حال برنامه‌ریزی');
+            const totalFutureAmount = pendingFuture.reduce((sum, f) => sum + (parseInt(f.estimatedAmount) || 0), 0);
+            
+            container.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-label">موجودی کل</div>
+                        <div class="stat-number ${balance >= 0 ? 'text-success' : 'text-danger'}">${formatMoney(balance)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🏠</div>
+                        <div class="stat-label">کل دارایی</div>
+                        <div class="stat-number">${formatMoney(totalAssets)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-label">درآمد این ماه</div>
+                        <div class="stat-number text-success">${formatMoney(monthlyIncome)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">📉</div>
+                        <div class="stat-label">هزینه این ماه</div>
+                        <div class="stat-number text-danger">${formatMoney(monthlyExpenses)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🔮</div>
+                        <div class="stat-label">هزینه‌های پیش‌رو</div>
+                        <div class="stat-number text-warning">${formatMoney(totalFutureAmount)}</div>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-top: 15px;">
+                    <h3 style="margin-bottom: 15px;">🎯 اهداف مالی</h3>
+                    ${appData.goals.length === 0 ? '<p style="color: #999; text-align: center;">هنوز هدفی ثبت نکردی!</p>' : 
+                        appData.goals.slice(0, 3).map(g => {
+                            const progress = g.target > 0 ? (g.current / g.target * 100) : 0;
+                            return `
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span>${g.title}</span>
+                                        <span>${Math.round(progress)}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${progress}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')
+                    }
+                </div>
+                
+                <div class="card">
+                    <h3 style="margin-bottom: 15px;">🔮 هزینه‌های آینده فعال</h3>
+                    ${pendingFuture.length === 0 ? '<p style="color: #999; text-align: center;">هزینه آینده‌ای ثبت نشده</p>' :
+                        pendingFuture.slice(0, 5).map(f => `
+                            <div class="transaction-item" style="padding: 10px; margin-bottom: 8px;">
+                                <div class="transaction-info">
+                                    <div class="transaction-title">${f.title} <span class="priority-badge priority-${f.priority.split(' - ')[0]}">${f.priority}</span></div>
+                                    <div class="transaction-date">${f.timeRange} | ${f.status}</div>
+                                </div>
+                                <div class="transaction-amount text-warning">${formatMoney(f.estimatedAmount)}</div>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+        }
+        
+        // ============ هزینه‌ها ============
+        function renderExpensesList(container) {
+            const expenses = [...appData.expenses].reverse();
+            
+            container.innerHTML = `
+                <h2 style="margin-bottom: 15px;">💸 هزینه‌ها</h2>
+                ${expenses.length === 0 ? 
+                    '<div class="card" style="text-align: center; color: #999;">هنوز هزینه‌ای ثبت نشده!</div>' :
+                    expenses.map((e, i) => `
+                        <div class="transaction-item">
+                            <div class="transaction-icon" style="background: #ffebee;">💸</div>
+                            <div class="transaction-info">
+                                <div class="transaction-title">${e.category || 'بدون دسته'}</div>
+                                <div class="transaction-date">${e.date || ''}</div>
+                                ${e.description ? `<div style="font-size: 0.8rem; color: #999;">${e.description}</div>` : ''}
+                            </div>
+                            <div class="transaction-amount text-danger">${formatMoney(e.amount)}</div>
+                            <button onclick="deleteExpense(${appData.expenses.length - 1 - i})" 
+                                    style="background: none; border: none; font-size: 1.5rem; margin-right: 10px; cursor: pointer;">
+                                🗑️
+                            </button>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+        
+        function showAddExpenseModal() {
+            const categories = ['مواد غذایی', 'حمل‌ونقل', 'قبوض', 'سلامت', 'آموزش', 'ابزار کار', 'تفریح', 'خانواده', 'سرمایه‌گذاری', 'متفرقه'];
+            
+            document.getElementById('modalContent').innerHTML = `
+                <div class="modal-header">
+                    <h2>➕ ثبت هزینه جدید</h2>
+                    <button class="modal-close" onclick="closeModal()">✕</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📅 تاریخ</label>
+                    <input type="date" class="form-input" id="expDate" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💵 مبلغ (تومان)</label>
+                    <input type="number" class="form-input" id="expAmount" placeholder="مثلاً ۵۰۰۰۰۰" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📂 دسته</label>
+                    <select class="form-input" id="expCategory">
+                        ${categories.map(c => `<option value="${c}">${c}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">❗ ضروری؟</label>
+                    <select class="form-input" id="expNecessary">
+                        <option value="بله">✅ بله</option>
+                        <option value="خیر">❌ خیر</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📝 توضیح</label>
+                    <input type="text" class="form-input" id="expDesc" placeholder="توضیح مختصر...">
+                </div>
+                <button class="btn btn-primary" onclick="addExpense()">💾 ذخیره هزینه</button>
+            `;
+            
+            document.getElementById('modal').classList.add('show');
+        }
+        
+        function addExpense() {
+            const expense = {
+                date: document.getElementById('expDate').value,
+                amount: document.getElementById('expAmount').value,
+                category: document.getElementById('expCategory').value,
+                necessary: document.getElementById('expNecessary').value,
+                description: document.getElementById('expDesc').value
+            };
+            
+            if (!expense.amount || expense.amount <= 0) {
+                showToast('❌ لطفاً مبلغ را وارد کن');
+                return;
+            }
+            
+            appData.expenses.push(expense);
+            saveData();
+            closeModal();
+            switchTab('expenses');
+            showToast('✅ هزینه با موفقیت ثبت شد');
+        }
+        
+        function deleteExpense(index) {
+            if (confirm('مطمئنی می‌خوای این هزینه رو حذف کنی؟')) {
+                appData.expenses.splice(index, 1);
+                saveData();
+                switchTab('expenses');
+                showToast('🗑️ هزینه حذف شد');
+            }
+        }
+        
+        // ============ درآمدها ============
+        function renderIncomeList(container) {
+            const income = [...appData.income].reverse();
+            
+            container.innerHTML = `
+                <h2 style="margin-bottom: 15px;">💵 درآمدها</h2>
+                ${income.length === 0 ? 
+                    '<div class="card" style="text-align: center; color: #999;">هنوز درآمدی ثبت نشده!</div>' :
+                    income.map((inc, i) => `
+                        <div class="transaction-item">
+                            <div class="transaction-icon" style="background: #e8f5e9;">💵</div>
+                            <div class="transaction-info">
+                                <div class="transaction-title">${inc.source || 'بدون منبع'}</div>
+                                <div class="transaction-date">${inc.date || ''}</div>
+                            </div>
+                            <div class="transaction-amount text-success">${formatMoney(inc.amount)}</div>
+                            <button onclick="deleteIncome(${appData.income.length - 1 - i})" 
+                                    style="background: none; border: none; font-size: 1.5rem; margin-right: 10px;">
+                                🗑️
+                            </button>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+        
+        function showAddIncomeModal() {
+            document.getElementById('modalContent').innerHTML = `
+                <div class="modal-header">
+                    <h2>➕ ثبت درآمد جدید</h2>
+                    <button class="modal-close" onclick="closeModal()">✕</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📅 تاریخ</label>
+                    <input type="date" class="form-input" id="incDate" value="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💵 مبلغ (تومان)</label>
+                    <input type="number" class="form-input" id="incAmount" placeholder="مثلاً ۱۰۰۰۰۰۰۰" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📂 منبع درآمد</label>
+                    <select class="form-input" id="incSource">
+                        <option value="حقوق">حقوق</option>
+                        <option value="سود معامله">سود معامله</option>
+                        <option value="هدیه">هدیه</option>
+                        <option value="فروش کالا">فروش کالا</option>
+                        <option value="سایر">سایر</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📝 توضیح</label>
+                    <input type="text" class="form-input" id="incDesc" placeholder="توضیح مختصر...">
+                </div>
+                <button class="btn btn-primary" onclick="addIncome()">💾 ذخیره درآمد</button>
+            `;
+            
+            document.getElementById('modal').classList.add('show');
+        }
+        
+        function addIncome() {
+            const income = {
+                date: document.getElementById('incDate').value,
+                amount: document.getElementById('incAmount').value,
+                source: document.getElementById('incSource').value,
+                description: document.getElementById('incDesc').value
+            };
+            
+            if (!income.amount || income.amount <= 0) {
+                showToast('❌ لطفاً مبلغ را وارد کن');
+                return;
+            }
+            
+            appData.income.push(income);
+            saveData();
+            closeModal();
+            switchTab('income');
+            showToast('✅ درآمد با موفقیت ثبت شد');
+        }
+        
+        function deleteIncome(index) {
+            if (confirm('مطمئنی می‌خوای این درآمد رو حذف کنی؟')) {
+                appData.income.splice(index, 1);
+                saveData();
+                switchTab('income');
+                showToast('🗑️ درآمد حذف شد');
+            }
+        }
+        
+        // ============ هزینه‌های آینده ============
+        function renderFutureExpensesList(container) {
+            const future = [...appData.futureExpenses].reverse();
+            
+            container.innerHTML = `
+                <h2 style="margin-bottom: 15px;">🔮 هزینه‌های آینده</h2>
+                ${future.length === 0 ? 
+                    '<div class="card" style="text-align: center; color: #999;">هیچ هزینه آینده‌ای ثبت نشده!</div>' :
+                    future.map((f, i) => `
+                        <div class="card" style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <h3>${f.title}</h3>
+                                    <div style="margin: 5px 0;">
+                                        <span class="priority-badge priority-${f.priority.split(' - ')[0]}">${f.priority}</span>
+                                        <span style="font-size: 0.8rem; margin-right: 5px;">${f.timeRange}</span>
+                                    </div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">وضعیت: ${f.status}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">صندوق تأمین: ${f.fundSource || 'مشخص نشده'}</div>
+                                    ${f.description ? `<div style="font-size: 0.8rem; color: #999;">${f.description}</div>` : ''}
+                                </div>
+                                <div style="text-align: left;">
+                                    <div class="transaction-amount text-warning">${formatMoney(f.estimatedAmount)}</div>
+                                    <button onclick="deleteFutureExpense(${appData.futureExpenses.length - 1 - i})" 
+                                            style="background: none; border: none; font-size: 1.5rem; cursor: pointer; margin-top: 5px;">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')
+                }
+            `;
+        }
+        
+        function showAddFutureExpenseModal() {
+            document.getElementById('modalContent').innerHTML = `
+                <div class="modal-header">
+                    <h2>🔮 ثبت هزینه آینده</h2>
+                    <button class="modal-close" onclick="closeModal()">✕</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📛 عنوان</label>
+                    <input type="text" class="form-input" id="futureTitle" placeholder="مثلاً تعمیر ماشین">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💵 مبلغ تقریبی (تومان)</label>
+                    <input type="number" class="form-input" id="futureAmount" placeholder="مبلغ پیش‌بینی‌شده">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📅 بازه زمانی</label>
+                    <select class="form-input" id="futureTimeRange">
+                        <option value="این هفته">این هفته</option>
+                        <option value="این ماه">این ماه</option>
+                        <option value="ماه آینده">ماه آینده</option>
+                        <option value="سه ماه آینده">سه ماه آینده</option>
+                        <option value="شش ماه آینده">شش ماه آینده</option>
+                        <option value="یک سال آینده">یک سال آینده</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">⚠️ اولویت</label>
+                    <select class="form-input" id="futurePriority">
+                        <option value="۱ - فوری">۱ - فوری</option>
+                        <option value="۲ - مهم">۲ - مهم</option>
+                        <option value="۳ - متوسط">۳ - متوسط</option>
+                        <option value="۴ - کم‌اهمیت">۴ - کم‌اهمیت</option>
+                        <option value="۵ - هوسی">۵ - هوسی</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📊 وضعیت</label>
+                    <select class="form-input" id="futureStatus">
+                        <option value="انجام نشده">انجام نشده</option>
+                        <option value="در حال برنامه‌ریزی">در حال برنامه‌ریزی</option>
+                        <option value="انجام شد">انجام شد</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🏦 صندوق تأمین</label>
+                    <select class="form-input" id="futureFundSource">
+                        <option value="درآمد جاری">درآمد جاری</option>
+                        <option value="پس‌انداز اضطراری">پس‌انداز اضطراری</option>
+                        <option value="سرمایه ترید">سرمایه ترید</option>
+                        <option value="هدیه">هدیه</option>
+                        <option value="سایر">سایر</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📝 توضیح</label>
+                    <input type="text" class="form-input" id="futureDesc" placeholder="توضیح مختصر...">
+                </div>
+                <button class="btn btn-primary" onclick="addFutureExpense()">💾 ذخیره</button>
+            `;
+            
+            document.getElementById('modal').classList.add('show');
+        }
+        
+        function addFutureExpense() {
+            const future = {
+                title: document.getElementById('futureTitle').value,
+                estimatedAmount: document.getElementById('futureAmount').value,
+                timeRange: document.getElementById('futureTimeRange').value,
+                priority: document.getElementById('futurePriority').value,
+                status: document.getElementById('futureStatus').value,
+                fundSource: document.getElementById('futureFundSource').value,
+                description: document.getElementById('futureDesc').value
+            };
+            
+            if (!future.title || !future.estimatedAmount || future.estimatedAmount <= 0) {
+                showToast('❌ عنوان و مبلغ را کامل کن');
+                return;
+            }
+            
+            appData.futureExpenses.push(future);
+            saveData();
+            closeModal();
+            switchTab('future');
+            showToast('✅ هزینه آینده ثبت شد');
+        }
+        
+        function deleteFutureExpense(index) {
+            if (confirm('حذف این هزینه آینده؟')) {
+                appData.futureExpenses.splice(index, 1);
+                saveData();
+                switchTab('future');
+            }
+        }
+        
+        // ============ دارایی‌ها ============
+        function renderAssetsList(container) {
+            container.innerHTML = `
+                <h2 style="margin-bottom: 15px;">🏠 دارایی‌ها</h2>
+                <button class="btn btn-primary" onclick="showAddAssetModal()">➕ افزودن دارایی جدید</button>
+                
+                <div style="margin-top: 15px;">
+                    ${appData.assets.length === 0 ? 
+                        '<div class="card" style="text-align: center; color: #999;">هنوز دارایی ثبت نشده!</div>' :
+                        appData.assets.map((a, i) => `
+                            <div class="transaction-item">
+                                <div class="transaction-icon" style="background: #fff3e0;">🏠</div>
+                                <div class="transaction-info">
+                                    <div class="transaction-title">${a.name}</div>
+                                    <div class="transaction-date">مقدار: ${a.qty || 0}</div>
+                                </div>
+                                <div class="transaction-amount">${formatMoney(a.value)}</div>
+                                <button onclick="deleteAsset(${i})" 
+                                        style="background: none; border: none; font-size: 1.5rem; margin-right: 10px;">
+                                    🗑️
+                                </button>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+        }
+        
+        function showAddAssetModal() {
+            document.getElementById('modalContent').innerHTML = `
+                <div class="modal-header">
+                    <h2>🏠 ثبت دارایی</h2>
+                    <button class="modal-close" onclick="closeModal()">✕</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">📛 نام دارایی</label>
+                    <input type="text" class="form-input" id="assetName" placeholder="مثلاً طلا، سکه، خانه">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🔢 مقدار</label>
+                    <input type="number" class="form-input" id="assetQty" placeholder="تعداد">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💵 ارزش (تومان)</label>
+                    <input type="number" class="form-input" id="assetValue" placeholder="ارزش کل">
+                </div>
+                <button class="btn btn-primary" onclick="addAsset()">💾 ذخیره</button>
+            `;
+            
+            document.getElementById('modal').classList.add('show');
+        }
+        
+        function addAsset() {
+            const name = document.getElementById('assetName').value;
+            const qty = document.getElementById('assetQty').value;
+            const value = document.getElementById('assetValue').value;
+            
+            if (!name || !value) {
+                showToast('❌ نام و ارزش دارایی را وارد کن');
+                return;
+            }
+            
+            appData.assets.push({ name, qty, value });
+            saveData();
+            closeModal();
+            switchTab('assets');
+            showToast('✅ دارایی ثبت شد');
+        }
+        
+        function deleteAsset(index) {
+            if (confirm('حذف این دارایی؟')) {
+                appData.assets.splice(index, 1);
+                saveData();
+                switchTab('assets');
+            }
+        }
+        
+        // ============ اهداف ============
+        function renderGoalsList(container) {
+            container.innerHTML = `
+                <h2 style="margin-bottom: 15px;">🎯 اهداف مالی</h2>
+                <button class="btn btn-primary" onclick="showAddGoalModal()">➕ هدف جدید</button>
+                
+                <div style="margin-top: 15px;">
+                    ${appData.goals.length === 0 ? 
+                        '<div class="card" style="text-align: center; color: #999;">هنوز هدفی تعیین نکردی!</div>' :
+                        appData.goals.map((g, i) => {
+                            const progress = g.target > 0 ? (g.current / g.target * 100) : 0;
+                            const remaining = g.target - g.current;
+                            return `
+                                <div class="card">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <h3>${g.title}</h3>
+                                        <button onclick="deleteGoal(${i})" style="background: none; border: none; font-size: 1.5rem;">🗑️</button>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span>${formatMoney(g.current)} از ${formatMoney(g.target)}</span>
+                                        <span>${Math.round(progress)}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${progress}%"></div>
+                                    </div>
+                                    ${remaining > 0 ? `<p style="margin-top: 10px; color: #ff6f00;">⚠️ ${formatMoney(remaining)} باقی‌مانده</p>` : '<p style="margin-top: 10px; color: green;">✅ کامل شد!</p>'}
+                                </div>
+                            `;
+                        }).join('')
+                    }
+                </div>
+            `;
+        }
+        
+        function showAddGoalModal() {
+            document.getElementById('modalContent').innerHTML = `
+                <div class="modal-header">
+                    <h2>🎯 هدف جدید</h2>
+                    <button class="modal-close" onclick="closeModal()">✕</button>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">🎯 عنوان هدف</label>
+                    <input type="text" class="form-input" id="goalTitle" placeholder="مثلاً خرید ماشین">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💵 مبلغ هدف</label>
+                    <input type="number" class="form-input" id="goalTarget" placeholder="مبلغ مورد نیاز">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">💰 مبلغ فعلی</label>
+                    <input type="number" class="form-input" id="goalCurrent" placeholder="چقدر داری؟">
+                </div>
+                <button class="btn btn-primary" onclick="addGoal()">💾 ذخیره هدف</button>
+            `;
+            
+            document.getElementById('modal').classList.add('show');
+        }
+        
+        function addGoal() {
+            const title = document.getElementById('goalTitle').value;
+            const target = parseInt(document.getElementById('goalTarget').value) || 0;
+            const current = parseInt(document.getElementById('goalCurrent').value) || 0;
+            
+            if (!title || !target) {
+                showToast('❌ عنوان و مبلغ هدف را وارد کن');
+                return;
+            }
+            
+            appData.goals.push({ title, target, current });
+            saveData();
+            closeModal();
+            switchTab('goals');
+            showToast('✅ هدف جدید ثبت شد');
+        }
+        
+        function deleteGoal(index) {
+            if (confirm('حذف این هدف؟')) {
+                appData.goals.splice(index, 1);
+                saveData();
+                switchTab('goals');
+            }
+        }
+        
+        // ============ مودال ============
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
+        
+        // ============ Event Listeners ============
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            switchTab('dashboard');
+            
+            document.querySelectorAll('.tab-chip').forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = e.target.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    const tabName = e.currentTarget.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+            
+            document.getElementById('fabButton').addEventListener('click', () => {
+                if (currentTab === 'expenses') {
+                    showAddExpenseModal();
+                } else if (currentTab === 'income') {
+                    showAddIncomeModal();
+                } else if (currentTab === 'future') {
+                    showAddFutureExpenseModal();
+                } else if (currentTab === 'assets') {
+                    showAddAssetModal();
+                } else if (currentTab === 'goals') {
+                    showAddGoalModal();
+                }
+            });
+            
+            document.getElementById('modal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('modal')) {
+                    closeModal();
+                }
+            });
+            
+            updateQuickBalance();
+        });
+        
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {});
+            });
+        }
+    </script>
+</body>
+</html>
