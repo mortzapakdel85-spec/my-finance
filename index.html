@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a237e">
+    <title>مدیریت مالی</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a237e, #534bae);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .balance-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tabs::-webkit-scrollbar { display: none; }
+        
+        .tab-btn {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #1a237e;
+            font-weight: bold;
+            transform: scale(1.05);
+        }
+        
+        .content {
+            padding: 15px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-box {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .stat-icon { font-size: 2rem; margin-bottom: 5px; }
+        .stat-label { font-size: 0.75rem; color: #757575; margin-bottom: 5px; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; }
+        
+        .green { color: #2e7d32; }
+        .red { color: #c62828; }
+        .orange { color: #ff6f00; }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: #757575;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: #fafafa;
+            transition: all 0.3s;
+            -webkit-appearance: none;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1a237e;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(26,35,126,0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: #1a237e;
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .btn:active { transform: scale(0.95); }
+        
+        .btn-del {
+            background: #c62828;
+            padding: 8px 15px;
+            width: auto;
+            font-size: 0.9rem;
+        }
+        
+        .list-item {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .priority-1 { border-right: 4px solid #c62828; }
+        .priority-2 { border-right: 4px solid #ff6f00; }
+        .priority-3 { border-right: 4px solid #fdd835; }
+        .priority-4 { border-right: 4px solid #66bb6a; }
+        .priority-5 { border-right: 4px solid #ab47bc; }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #2e7d32;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            z-index: 300;
+            animation: fadeInOut 2s ease;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            20% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>💰 مدیریت مالی</h1>
+        <div class="balance-badge" id="balanceDisplay">موجودی: ۰ تومان</div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('dashboard')">📊 داشبورد</button>
+        <button class="tab-btn" onclick="showTab('expenses')">💸 هزینه‌ها</button>
+        <button class="tab-btn" onclick="showTab('income')">💵 درآمدها</button>
+        <button class="tab-btn" onclick="showTab('future')">🔮 آینده</button>
+        <button class="tab-btn" onclick="showTab('assets')">🏠 دارایی</button>
+        <button class="tab-btn" onclick="showTab('goals')">🎯 اهداف</button>
+    </div>
+
+    <div class="content" id="mainContent"></div>
+
+    <script>
+        // ============ DATA MANAGEMENT ============
+        let data = JSON.parse(localStorage.getItem('financeData')) || {
+            expenses: [],
+            income: [],
+            futureExpenses: [],
+            assets: [],
+            goals: []
+        };
+
+        function saveData() {
+            localStorage.setItem('financeData', JSON.stringify(data));
+            updateBalance();
+        }
+
+        function updateBalance() {
+            const totalIncome = data.income.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+            const totalExpenses = data.expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+            const balance = totalIncome - totalExpenses;
+            const formatted = new Intl.NumberFormat('fa-IR').format(balance);
+            document.getElementById('balanceDisplay').textContent = 'موجودی: ' + formatted + ' تومان';
+        }
+
+        function formatMoney(amount) {
+            return new Intl.NumberFormat('fa-IR').format(Number(amount) || 0) + ' تومان';
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        // ============ NAVIGATION ============
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const content = document.getElementById('mainContent');
+            
+            switch(tabName) {
+                case 'dashboard': renderDashboard(content); break;
+                case 'expenses': renderExpenses(content); break;
+                case 'income': renderIncome(content); break;
+                case 'future': renderFuture(content); break;
+                case 'assets': renderAssets(content); break;
+                case 'goals': renderGoals(content); break;
+            }
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ============ DASHBOARD ============
+        function renderDashboard(container) {
+            const totalIncome = data.income.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+            const totalExpenses = data.expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+            const totalAssets = data.assets.reduce((sum, a) => sum + (Number(a.value) || 0), 0);
+            const balance = totalIncome - totalExpenses;
+            
+            const pendingFuture = data.futureExpenses
+                .filter(f => f.status !== 'انجام شد')
+                .reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
+
+            container.innerHTML = `
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-label">موجودی</div>
+                        <div class="stat-value ${balance >= 0 ? 'green' : 'red'}">${formatMoney(balance)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-label">درآمد کل</div>
+                        <div class="stat-value green">${formatMoney(totalIncome)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon">📉</div>
+                        <div class="stat-label">هزینه کل</div>
+                        <div class="stat-value red">${formatMoney(totalExpenses)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon">🏠</div>
+                        <div class="stat-label">دارایی</div>
+                        <div class="stat-value">${formatMoney(totalAssets)}</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-icon">🔮</div>
+                        <div class="stat-label">هزینه‌های پیش‌رو</div>
+                        <div class="stat-value orange">${formatMoney(pendingFuture)}</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3 style="margin-bottom:15px;">🎯 اهداف</h3>
+                    ${data.goals.length === 0 ? '<p style="color:#999;text-align:center;">بدون هدف</p>' :
+                        data.goals.slice(0,3).map(g => {
+                            const pct = g.target > 0 ? (g.current/g.target*100) : 0;
+                            return `
+                                <div style="margin-bottom:15px;">
+                                    <div style="display:flex;justify-content:space-between;">
+                                        <span><strong>${g.title}</strong></span>
+                                        <span>${Math.round(pct)}%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width:${pct}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')
+                    }
+                </div>
+                
+                <div class="card">
+                    <h3 style="margin-bottom:15px;">🔮 هزینه‌های آینده فعال</h3>
+                    ${pendingFuture === 0 ? '<p style="color:#999;text-align:center;">بدون هزینه آینده</p>' :
+                        data.futureExpenses.filter(f => f.status !== 'انجام شد').slice(0,5).map(f => `
+                            <div class="list-item priority-${f.priority.charAt(0)}" style="margin-bottom:8px;">
+                                <div>
+                                    <strong>${f.title}</strong>
+                                    <small style="color:#666;"> | ${f.timeRange} | ${f.status}</small>
+                                </div>
+                                <span class="orange" style="font-weight:bold;">${formatMoney(f.amount)}</span>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+        }
+
+        // ============ EXPENSES ============
+        function renderExpenses(container) {
+            container.innerHTML = `
+                <div class="card">
+                    <h3>➕ ثبت هزینه جدید</h3>
+                    <div class="form-group">
+                        <label>📅 تاریخ</label>
+                        <input type="date" id="expDate" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label>💵 مبلغ (تومان)</label>
+                        <input type="number" id="expAmount" placeholder="مبلغ">
+                    </div>
+                    <div class="form-group">
+                        <label>📂 دسته</label>
+                        <select id="expCategory">
+                            <option>مواد غذایی</option><option>حمل‌ونقل</option><option>قبوض</option>
+                            <option>سلامت</option><option>آموزش</option><option>ابزار کار</option>
+                            <option>تفریح</option><option>خانواده</option><option>سرمایه‌گذاری</option>
+                            <option>متفرقه</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>❗ ضروری؟</label>
+                        <select id="expNecessary">
+                            <option>بله</option><option>خیر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📝 توضیح</label>
+                        <input type="text" id="expDesc" placeholder="توضیح">
+                    </div>
+                    <button class="btn" onclick="addExpense()">💾 ثبت هزینه</button>
+                </div>
+                
+                <h3>📋 تاریخچه</h3>
+                ${[...data.expenses].reverse().map((e, i) => `
+                    <div class="list-item">
+                        <div>
+                            <strong>${e.category}</strong><br>
+                            <small>${e.date} ${e.description ? '| '+e.description : ''}</small>
+                        </div>
+                        <div>
+                            <span class="red" style="font-weight:bold;">${formatMoney(e.amount)}</span>
+                            <button class="btn btn-del" onclick="deleteExpense(${data.expenses.length-1-i})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('') || '<p style="text-align:center;color:#999;">بدون هزینه</p>'}
+            `;
+        }
+
+        function addExpense() {
+            const expense = {
+                date: document.getElementById('expDate').value,
+                amount: document.getElementById('expAmount').value,
+                category: document.getElementById('expCategory').value,
+                necessary: document.getElementById('expNecessary').value,
+                description: document.getElementById('expDesc').value
+            };
+            if (!expense.amount || Number(expense.amount) <= 0) {
+                showToast('❌ مبلغ را وارد کن');
+                return;
+            }
+            data.expenses.push(expense);
+            saveData();
+            showTab('expenses');
+            showToast('✅ ثبت شد');
+        }
+
+        function deleteExpense(index) {
+            if (confirm('حذف شود؟')) {
+                data.expenses.splice(index, 1);
+                saveData();
+                showTab('expenses');
+            }
+        }
+
+        // ============ INCOME ============
+        function renderIncome(container) {
+            container.innerHTML = `
+                <div class="card">
+                    <h3>➕ ثبت درآمد جدید</h3>
+                    <div class="form-group">
+                        <label>📅 تاریخ</label>
+                        <input type="date" id="incDate" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div class="form-group">
+                        <label>💵 مبلغ (تومان)</label>
+                        <input type="number" id="incAmount" placeholder="مبلغ">
+                    </div>
+                    <div class="form-group">
+                        <label>📂 منبع</label>
+                        <select id="incSource">
+                            <option>حقوق</option><option>سود معامله</option><option>هدیه</option>
+                            <option>فروش کالا</option><option>سایر</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="addIncome()">💾 ثبت درآمد</button>
+                </div>
+                
+                <h3>📋 تاریخچه</h3>
+                ${[...data.income].reverse().map((inc, i) => `
+                    <div class="list-item">
+                        <div>
+                            <strong>${inc.source}</strong><br>
+                            <small>${inc.date}</small>
+                        </div>
+                        <div>
+                            <span class="green" style="font-weight:bold;">${formatMoney(inc.amount)}</span>
+                            <button class="btn btn-del" onclick="deleteIncome(${data.income.length-1-i})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('') || '<p style="text-align:center;color:#999;">بدون درآمد</p>'}
+            `;
+        }
+
+        function addIncome() {
+            const income = {
+                date: document.getElementById('incDate').value,
+                amount: document.getElementById('incAmount').value,
+                source: document.getElementById('incSource').value
+            };
+            if (!income.amount || Number(income.amount) <= 0) {
+                showToast('❌ مبلغ را وارد کن');
+                return;
+            }
+            data.income.push(income);
+            saveData();
+            showTab('income');
+            showToast('✅ ثبت شد');
+        }
+
+        function deleteIncome(index) {
+            if (confirm('حذف شود؟')) {
+                data.income.splice(index, 1);
+                saveData();
+                showTab('income');
+            }
+        }
+
+        // ============ FUTURE EXPENSES ============
+        function renderFuture(container) {
+            container.innerHTML = `
+                <div class="card">
+                    <h3>🔮 ثبت هزینه آینده</h3>
+                    <div class="form-group">
+                        <label>📛 عنوان</label>
+                        <input type="text" id="futureTitle" placeholder="عنوان هزینه">
+                    </div>
+                    <div class="form-group">
+                        <label>💵 مبلغ تقریبی (تومان)</label>
+                        <input type="number" id="futureAmount" placeholder="مبلغ پیش‌بینی">
+                    </div>
+                    <div class="form-group">
+                        <label>📅 بازه زمانی</label>
+                        <select id="futureTime">
+                            <option>این هفته</option><option>این ماه</option><option>ماه آینده</option>
+                            <option>سه ماه آینده</option><option>شش ماه آینده</option><option>یک سال آینده</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>⚠️ اولویت</label>
+                        <select id="futurePriority">
+                            <option>۱ - فوری</option><option>۲ - مهم</option><option>۳ - متوسط</option>
+                            <option>۴ - کم‌اهمیت</option><option>۵ - هوسی</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📊 وضعیت</label>
+                        <select id="futureStatus">
+                            <option>انجام نشده</option><option>در حال برنامه‌ریزی</option><option>انجام شد</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>🏦 صندوق تأمین</label>
+                        <select id="futureFund">
+                            <option>درآمد جاری</option><option>پس‌انداز اضطراری</option>
+                            <option>سرمایه ترید</option><option>هدیه</option><option>سایر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>📝 توضیح</label>
+                        <input type="text" id="futureDesc" placeholder="توضیح">
+                    </div>
+                    <button class="btn" onclick="addFuture()">💾 ذخیره</button>
+                </div>
+                
+                <h3>📋 هزینه‌های آینده</h3>
+                ${[...data.futureExpenses].reverse().map((f, i) => `
+                    <div class="list-item priority-${f.priority.charAt(0)}">
+                        <div>
+                            <strong>${f.title}</strong>
+                            <small style="color:#666;"> | ${f.timeRange} | ${f.status}</small>
+                            ${f.description ? `<br><small>${f.description}</small>` : ''}
+                            <br><small>صندوق: ${f.fundSource}</small>
+                        </div>
+                        <div>
+                            <span class="orange" style="font-weight:bold;">${formatMoney(f.amount)}</span>
+                            <button class="btn btn-del" onclick="deleteFuture(${data.futureExpenses.length-1-i})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('') || '<p style="text-align:center;color:#999;">بدون هزینه آینده</p>'}
+            `;
+        }
+
+        function addFuture() {
+            const future = {
+                title: document.getElementById('futureTitle').value,
+                amount: document.getElementById('futureAmount').value,
+                timeRange: document.getElementById('futureTime').value,
+                priority: document.getElementById('futurePriority').value,
+                status: document.getElementById('futureStatus').value,
+                fundSource: document.getElementById('futureFund').value,
+                description: document.getElementById('futureDesc').value
+            };
+            if (!future.title || !future.amount || Number(future.amount) <= 0) {
+                showToast('❌ عنوان و مبلغ را کامل کن');
+                return;
+            }
+            data.futureExpenses.push(future);
+            saveData();
+            showTab('future');
+            showToast('✅ هزینه آینده ثبت شد');
+        }
+
+        function deleteFuture(index) {
+            if (confirm('حذف شود؟')) {
+                data.futureExpenses.splice(index, 1);
+                saveData();
+                showTab('future');
+            }
+        }
+
+        // ============ ASSETS ============
+        function renderAssets(container) {
+            container.innerHTML = `
+                <div class="card">
+                    <h3>🏠 ثبت دارایی</h3>
+                    <div class="form-group">
+                        <label>📛 نام دارایی</label>
+                        <input type="text" id="assetName" placeholder="مثلاً طلا، خانه">
+                    </div>
+                    <div class="form-group">
+                        <label>🔢 مقدار</label>
+                        <input type="number" id="assetQty" placeholder="تعداد">
+                    </div>
+                    <div class="form-group">
+                        <label>💵 ارزش (تومان)</label>
+                        <input type="number" id="assetValue" placeholder="ارزش کل">
+                    </div>
+                    <button class="btn" onclick="addAsset()">💾 ذخیره</button>
+                </div>
+                
+                ${data.assets.map((a, i) => `
+                    <div class="list-item">
+                        <div>
+                            <strong>${a.name}</strong> | مقدار: ${a.qty}
+                        </div>
+                        <div>
+                            <span style="font-weight:bold;">${formatMoney(a.value)}</span>
+                            <button class="btn btn-del" onclick="deleteAsset(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function addAsset() {
+            const asset = {
+                name: document.getElementById('assetName').value,
+                qty: document.getElementById('assetQty').value,
+                value: document.getElementById('assetValue').value
+            };
+            if (!asset.name || !asset.value || Number(asset.value) <= 0) {
+                showToast('❌ نام و ارزش را وارد کن');
+                return;
+            }
+            data.assets.push(asset);
+            saveData();
+            showTab('assets');
+            showToast('✅ دارایی ثبت شد');
+        }
+
+        function deleteAsset(index) {
+            if (confirm('حذف شود؟')) {
+                data.assets.splice(index, 1);
+                saveData();
+                showTab('assets');
+            }
+        }
+
+        // ============ GOALS ============
+        function renderGoals(container) {
+            container.innerHTML = `
+                <div class="card">
+                    <h3>🎯 هدف جدید</h3>
+                    <div class="form-group">
+                        <label>🎯 عنوان</label>
+                        <input type="text" id="goalTitle" placeholder="هدف">
+                    </div>
+                    <div class="form-group">
+                        <label>💵 مبلغ هدف</label>
+                        <input type="number" id="goalTarget" placeholder="مبلغ کل">
+                    </div>
+                    <div class="form-group">
+                        <label>💰 مبلغ فعلی</label>
+                        <input type="number" id="goalCurrent" placeholder="پس‌انداز فعلی">
+                    </div>
+                    <button class="btn" onclick="addGoal()">💾 ذخیره</button>
+                </div>
+                
+                ${data.goals.map((g, i) => {
+                    const pct = g.target > 0 ? (g.current/g.target*100) : 0;
+                    return `
+                        <div class="list-item">
+                            <div style="flex:1;">
+                                <strong>${g.title}</strong>
+                                <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+                                <small>${formatMoney(g.current)} از ${formatMoney(g.target)}</small>
+                            </div>
+                            <div>
+                                <span>${Math.round(pct)}%</span>
+                                <button class="btn btn-del" onclick="deleteGoal(${i})">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+        }
+
+        function addGoal() {
+            const goal = {
+                title: document.getElementById('goalTitle').value,
+                target: Number(document.getElementById('goalTarget').value),
+                current: Number(document.getElementById('goalCurrent').value)
+            };
+            if (!goal.title || !goal.target) {
+                showToast('❌ عنوان و مبلغ هدف را وارد کن');
+                return;
+            }
+            data.goals.push(goal);
+            saveData();
+            showTab('goals');
+            showToast('✅ هدف ثبت شد');
+        }
+
+        function deleteGoal(index) {
+            if (confirm('حذف شود؟')) {
+                data.goals.splice(index, 1);
+                saveData();
+                showTab('goals');
+            }
+        }
+
+        // ============ INITIAL LOAD ============
+        updateBalance();
+        renderDashboard(document.getElementById('mainContent'));
+    </script>
+</body>
+</html>
